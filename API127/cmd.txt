@@ -1,0 +1,4 @@
+dotnet ef migrations add test21092024
+dotnet ef database update
+
+dotnet ef migrations remove

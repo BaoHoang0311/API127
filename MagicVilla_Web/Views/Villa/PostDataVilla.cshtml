@@ -1,0 +1,29 @@
+﻿@model MagicVilla_Web.Models.Dto.VillaCreateDTO1
+
+<form asp-action="PostDataVilla" enctype="multipart/form-data">
+    <br />
+    <div class="container border p-3">
+        <h1 class="text-primary">Post Data Villa</h1>
+        <hr />
+
+        <div class="row">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div>
+                ImageUrl
+                <input asp-for="ImageUrl">
+            </div>
+            <div>
+                Files
+                <input asp-for="files">
+            </div>
+            <div class="col-5">
+                <input type="submit" value="Create" class="btn btn-success form-control" />
+            </div>
+        </div>
+    </div>
+</form>
+
+                
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+}
