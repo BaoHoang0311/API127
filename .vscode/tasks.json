@@ -1,0 +1,33 @@
+//workspaceFolder: E:\API_127\API_127
+{
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "label": "API127build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+
+                "${workspaceFolder}/API127/API127.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "MagicVillabuild",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+				//workspaceFolder: E:\API_127\API_127
+                // E:\API_127\API_127\MagicVilla_Web\MagicVilla_Web.csproj
+                "${workspaceFolder}/MagicVilla_Web/MagicVilla_Web.csproj",
+                "/property:GenerateFullPaths=true",
+                "/consoleloggerparameters:NoSummary"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+	]
+}

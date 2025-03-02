@@ -1,4 +1,4 @@
-using MagicVilla_Web;
+﻿using MagicVilla_Web;
 using MagicVilla_Web.Services;
 using MagicVilla_Web.Services.IServices;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -40,8 +40,12 @@ builder.Services.AddSession(options =>
     options.Cookie.IsEssential = true;
 });
 #endregion
-
 #region Submit File
+// dek cần cho API PostFile3
+//builder.WebHost.ConfigureKestrel(serverOptions =>
+//{
+//    serverOptions.Limits.MaxRequestBodySize = long.MaxValue;
+//});
 builder.Services.Configure<FormOptions>(options=>
 {
     options.MultipartBodyLengthLimit = 5L * 1024 * 1024 * 1024;

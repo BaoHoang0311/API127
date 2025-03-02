@@ -1,0 +1,16 @@
+@API_HostAddress = https://localhost:5001
+
+Post {{API_HostAddress}}/api/UserAPI/login
+Content-Type: application/json
+
+{
+    "username" : "bao",
+    "password": "1234"
+}
+
+###
+Get {{API_HostAddress}}/api/v1/VillaAPI
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJRCI6IjNhZDkwZjIwLTE1NWMtNDAyMS1iNjM0LWMxY2I2ODY4MjFlZCIsIm5hbWUiOiJiYW8iLCJoaWhpIjoiQmFvIGdvIGhpIGhpIiwicm9sZSI6WyJTdXAgQWRtaW4iLCJhZG1pbiJdLCJuYmYiOjE3MzcxOTI4NzMsImV4cCI6MTczNzE5Mjk5MywiaWF0IjoxNzM3MTkyODczfQ._4VwjgajxIwPtFpURLrN9FNgvjg1vIiHxbIQ89kwSEY
+
+

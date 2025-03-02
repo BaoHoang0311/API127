@@ -8,12 +8,15 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
 using Azure;
+using System.Collections.Generic;
+using Asp.Versioning;
+using API127.Controllers.v1;
 
 namespace API127.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    
+    [ApiVersionNeutral]
     public class UserAPIController : ControllerBase
     {
         private readonly ILogger<VillaAPIController> _serilog;
@@ -56,6 +59,8 @@ namespace API127.Controllers
                 _response.Result = res;
                 _response.StatusCode = HttpStatusCode.OK;
                 _response.IsSuccess = true;
+
+                Response.Headers.Add("X-Total-Count", "{555list.Count.ToString()");
                 return Ok(_response);
             }
             catch (Exception ex)

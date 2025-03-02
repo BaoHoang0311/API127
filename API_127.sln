@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API127", "API127\API127.csproj", "{CCB7343A-15EB-4A6E-88E2-CDF3970928D1}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MagicVilla_Utility", "MagicVilla_Utility\MagicVilla_Utility.csproj", "{4F62B39D-BE43-434A-B662-6A0409E57DC1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MagicVilla_Web", "MagicVilla_Web\MagicVilla_Web.csproj", "{081357CC-5F23-4800-8D23-4731191A24C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API127", "API127\API127.csproj", "{5899E724-27E2-4302-8AD6-9E7FC580AD00}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CCB7343A-15EB-4A6E-88E2-CDF3970928D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CCB7343A-15EB-4A6E-88E2-CDF3970928D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CCB7343A-15EB-4A6E-88E2-CDF3970928D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CCB7343A-15EB-4A6E-88E2-CDF3970928D1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4F62B39D-BE43-434A-B662-6A0409E57DC1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4F62B39D-BE43-434A-B662-6A0409E57DC1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F62B39D-BE43-434A-B662-6A0409E57DC1}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -27,6 +23,10 @@ Global
 		{081357CC-5F23-4800-8D23-4731191A24C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{081357CC-5F23-4800-8D23-4731191A24C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{081357CC-5F23-4800-8D23-4731191A24C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5899E724-27E2-4302-8AD6-9E7FC580AD00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5899E724-27E2-4302-8AD6-9E7FC580AD00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5899E724-27E2-4302-8AD6-9E7FC580AD00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5899E724-27E2-4302-8AD6-9E7FC580AD00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

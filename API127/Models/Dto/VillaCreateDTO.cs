@@ -24,5 +24,6 @@ namespace API127.Models.Dto
     public class VillaCreateAPIDTO2
     {
         public string? ImageUrl { get; set; }
+        public IFormFile? File { get; set; } // Thêm thuộc tính File
     }
 }

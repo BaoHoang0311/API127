@@ -3,26 +3,27 @@ using API127.Logging;
 using API127.Models;
 using API127.Models.Dto;
 using API127.Repository.IRepository;
+using Asp.Versioning;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
-using System.Runtime.Serialization.Json;
+using System.Runtime.CompilerServices;
 using System.Security.Claims;
-using System.Text;
-using System.Threading;
-using System.IO;
-namespace API127.Controllers
+namespace API127.Controllers.v1
 {
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     [ApiController]
-    
+    //[Authorize]
+    [Route("api/v{version:apiVersion}/[controller]")]
     public class VillaAPIController : ControllerBase
     {
         private readonly ILogger<VillaAPIController> _serilog;
         private ApplicationDbContext _context;
-        //private IVillaRepository _villa;
         private IVillaRepositoryV2 _villa;
         private readonly ILogging _logger;
         private readonly IMapper _mapper;
@@ -31,7 +32,7 @@ namespace API127.Controllers
         public VillaAPIController(ILogging _logger, ApplicationDbContext context,
             IMapper mapper,
             IVillaRepositoryV2 villa,
-            ILogger<VillaAPIController> serilog, 
+            ILogger<VillaAPIController> serilog,
             IHttpContextAccessor httpContextAccessor)
         {
             this._logger = _logger;
@@ -39,13 +40,15 @@ namespace API127.Controllers
             _mapper = mapper;
             _villa = villa;
             _serilog = serilog;
-            this._apiResponse = new();
+            _apiResponse = new();
             _httpContextAccessor = httpContextAccessor;
         }
-        [HttpGet(Name = "abc")]
+        [HttpGet]
+        [ResponseCache(CacheProfileName = "Default30")]
+        [MapToApiVersion("1.0")]
         [Authorize]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult<IEnumerable<VillaCreateDTO>>> GetVillas()
+        public async Task<ActionResult<IEnumerable<VillaCreateDTO>>> GetVillas([FromQuery] int pageSize = 3, int pageNumber = 1)
         {
             try
             {
@@ -54,15 +57,25 @@ namespace API127.Controllers
                 var loginType = _httpContextAccessor.HttpContext?.User.FindFirstValue("LoginType");
                 _serilog.LogInformation("Getting all villa hjaha");
                 _logger.Log("Getting all villa hjaha _logger", "");
-                //return Ok(VillaStore.villalist);
-                var villa = await _villa.GetAllAsync();
+
+
+                var villa = await _villa.GetAllAsync(pageSize: pageSize, pageNumber: pageNumber);
+
                 var villaDTO = _mapper.Map<List<VillaDTO>>(villa);
                 _apiResponse.Result = villaDTO;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
-                _apiResponse.IsSuccess =true;
+                _apiResponse.IsSuccess = true;
+                Response.Headers.Add("X-Total-Count", "{555list.Count.ToString()");
+
+                PaginationModel pageModel = new PaginationModel()
+                {
+                    pageSize = pageSize,
+                    pageNumber = pageNumber
+                };
+                Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pageModel));
                 return Ok(_apiResponse);
             }
-            catch (Exception ex)
+            catch (Exception ex)   
             {
                 //logger.LogError("getting error");
                 //_logger.Log("getting error", "");
@@ -73,14 +86,28 @@ namespace API127.Controllers
                 return BadRequest(_apiResponse);
             }
         }
-
+        [HttpGet("Get_Cache")]
+        [ResponseCache(CacheProfileName = "Default30")]
+        public async Task<IActionResult> Get_Cache()
+        {
+            try
+            {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
         //[HttpGet("/abc/{id:int}")] // https://localhost:5001/abc/5
         //[HttpGet("abc/{id:int}")] // https://localhost:5001/api/VillaApi/abc/5
         [HttpGet("{id:int}")] // https://localhost:5001/api/VillaAPI/5
-        [Authorize(Roles ="1")]
+        //[Authorize(Roles = "1")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VillaCreateDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        //[ResponseCache(Duration = 10)]
+        //[ResponseCache(Location = ResponseCacheLocation.None,NoStore =  true)] // đéo lưu gì hết
         public async Task<ActionResult<VillaCreateDTO>> GetVillaByID(int id)
         {
             try
@@ -92,8 +119,10 @@ namespace API127.Controllers
                 var zz = await _villa.GetAsync(x => x.Id == id);
                 if (zz == null)
                 {
-                    //_logger.Log(" zz null");
-                    return NotFound();
+                    _apiResponse.StatusCode = HttpStatusCode.NotFound;
+                    _apiResponse.IsSuccess = false;
+                    _apiResponse.ErrorMessages = new List<string>() { "Wrong Id" };
+                    return NotFound(_apiResponse);
                 }
                 _apiResponse.Result = zz;
                 _apiResponse.StatusCode = HttpStatusCode.OK;
@@ -106,21 +135,125 @@ namespace API127.Controllers
                 return BadRequest(new APIResponse() { ErrorMessages = new List<string>() { ex.Message }, IsSuccess = false, StatusCode = HttpStatusCode.BadRequest });
             }
         }
+        public class QueryParameters1
+        {
+            [Required(ErrorMessage = "id is required")] // hiện required kiểu string
+            // {
+            //     "occupancy": 3 // thì int? Id hiện mess req, để int Id thì lúc này Id luôn = 0 nó ko hiện mess req đâu
+            // }
+            public int? Id { get; set; }
+            // [Required(ErrorMessage = "K is required")] // hiện required
 
-        // https://localhost:44300/api/VillaAPI/getbyname/abc {}bat buoc
-        //[HttpGet("getbyname/{name}")]
+            // public int? K {get;set;}
+
+            [Required(ErrorMessage = "content is required")] // hiện required kiểu string
+            /*
+             * {"Id" :3,"Occupancy":null  } cả 2 đều báo dòng chữ
+             * {"Id" :3 }      
+             */
+            public string Occupancy { get; set; }
+        }
+        [HttpPost("GetVillaOccupancy3")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VillaCreateDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<VillaCreateDTO>> GetVillaOccupancy3([FromBody] QueryParameters1 query)
+        {
+            try
+            {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new APIResponse() { ErrorMessages = new List<string>() { ex.Message }, IsSuccess = false, StatusCode = HttpStatusCode.BadRequest });
+            }
+        }
+        public class QueryParameters
+        {
+            public int Id { get; set; }
+            [BindRequired]//[FromForm] [FromQuery] work , còn thằng [FormBody]int/int? thì đéo
+            [Required(ErrorMessage = "content is required")]
+            public int Occupancy { get; set; }
+
+            [BindRequired]
+            public string Def { get; set; }
+            public string ABC { get; set; } // (string)The ABC field is required. (string? thì cho null ko đòi)
+                                            // {
+                                            //     "def":"3",
+                                            //     "aBC":5
+                                            // }
+
+        }
+        [HttpGet("GetVillaOccupancy4")] // https://localhost:5001/api/v1/VillaAPI/GetVillaOccupancy 
+        public async Task<ActionResult<VillaCreateDTO>> GetVillaOccupancy4([FromBody] QueryParameters query)
+        {
+            try
+            {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+        }
+        [HttpGet("GetVillaOccupancy")] // https://localhost:5001/api/v1/VillaAPI/GetVillaOccupancy 
+        public async Task<ActionResult<VillaCreateDTO>> GetVillaOccupancy([FromForm] QueryParameters query)
+
+        {
+            try
+            {
+                var zz = await _villa.GetAsync(x => x.Occupancy == query.Occupancy);
+                if (zz == null)
+                {
+                    return NotFound();
+                }
+                _apiResponse.Result = zz;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                _apiResponse.IsSuccess = true;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new APIResponse() { ErrorMessages = new List<string>() { ex.Message }, IsSuccess = false, StatusCode = HttpStatusCode.BadRequest });
+            }
+        }
+        [HttpGet("GetVillaOccupancy1")]
+        //https://localhost:5001/api/v1/VillaAPI/GetVillaOccupancy1?Id=5&def=a9 // [BindRequired] Occupancy :   ko có là nó báo
+        public async Task<ActionResult<VillaCreateDTO>> GetVillaOccupancy1([FromQuery] QueryParameters query)
+        {
+            try
+            {
+                string page = HttpContext.Request.Query["page"].ToString();
+                var zz = await _villa.GetAsync(x => x.Occupancy == query.Occupancy);
+                if (zz == null)
+                {
+                    return NotFound();
+                }
+                _apiResponse.Result = zz;
+                _apiResponse.StatusCode = HttpStatusCode.OK;
+                _apiResponse.IsSuccess = true;
+                return Ok(_apiResponse);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new APIResponse() { ErrorMessages = new List<string>() { ex.Message }, IsSuccess = false, StatusCode = HttpStatusCode.BadRequest });
+            }
+        }
+
+
+        // hthttps://localhost:5001/api/v1/VillaAPI/getbyname/name?Name={}bat buoc
         [HttpGet("getbyname/name")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(VillaCreateDTO))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
-        public async Task<ActionResult<VillaCreateDTO>> GetVillaByName(string? Name)
+        public async Task<ActionResult<VillaCreateDTO>> GetVillaByName(string Name)
         {
             try
             {
-                string? a ;
+                string? a;
                 string b;
                 var zz = await _context.Villas.FirstOrDefaultAsync(x => x.Name == Name);
-                if (zz == null) return NotFound(new { message = "khong tim ra cai name do", error = "Not found"});
+                if (zz == null) return NotFound(new { message = "khong tim ra cai name do", error = "Not found" });
                 return Ok(zz);
             }
             catch (Exception ex)
@@ -164,7 +297,7 @@ namespace API127.Controllers
                 await _villa.CreateAsync(villa);
                 // header: location có cái link~
                 //return CreatedAtRoute("abcde", new { id = villa.Id }, villa);
-                return Ok(new APIResponse() { ErrorMessages = new List<string>() { "" }, IsSuccess =true ,Result = new { villa.Id }, StatusCode = HttpStatusCode.OK });
+                return Ok(new APIResponse() { ErrorMessages = new List<string>() { "" }, IsSuccess = true, Result = new { villa.Id }, StatusCode = HttpStatusCode.OK });
             }
             catch (Exception ex)
             {
@@ -182,7 +315,7 @@ namespace API127.Controllers
             try
             {
 
-                return Ok(new { message =  "okkkkk" , thongtin = "may cut" });
+                return Ok(new { message = "okkkkk", thongtin = "may cut" });
             }
             catch (Exception ex)
             {
@@ -196,15 +329,25 @@ namespace API127.Controllers
         /// <param name="data"></param>
         /// <returns></returns>
         [HttpPost("PostVilla3")]
-        [RequestSizeLimit(5L * 1024 * 1024 * 1024)]
-        [MultipartFormData]
         public async Task<ActionResult<VillaCreateDTO>> PostVilla3([FromForm] VillaCreateAPIDTO2 data)
         {
             try
             {
+                var files = HttpContext.Request.Form.Files;
+                if (files != null && files.Count > 0)
+                {
+                    var file = files[0];
+                    var filePath = Path.Combine("Files", file.FileName);
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await file.CopyToAsync(stream);
+                    }
+                }
+
+                // Enable rewind so the body can be read multiple times
 
                 #region File to trực tiếp vào API , đã làm bên upload FileSLN.sln
-                var fileUploadSummary = await _villa.UploadFileAsync(HttpContext.Request.Body, Request.ContentType);
+                //var fileUploadSummary = await _villa.UploadFileAsync(HttpContext.Request.Body, Request.ContentType);
                 #endregion
 
                 return Ok(new { message = "okkkkk", thongtin = "may cut" });
@@ -213,6 +356,16 @@ namespace API127.Controllers
             {
                 return BadRequest();
             }
+        }
+        [HttpPost("upload-stream-multipartreader")]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status415UnsupportedMediaType)]
+        //[MultipartFormData]
+        public async Task<IActionResult> Upload()
+        {
+            var fileUploadSummary = await _villa.UploadFileAsync(HttpContext.Request.Body, Request.ContentType);
+
+            return CreatedAtAction(nameof(Upload), fileUploadSummary);
         }
         /// <summary>
         ///     Chunk File to nhưng file đã nằm trong máy rồi (MVC->API)
@@ -301,7 +454,7 @@ namespace API127.Controllers
                 _apiResponse.IsSuccess = true;
                 return Ok(_apiResponse);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //_logger.Log("getting error");
                 return BadRequest(new APIResponse() { ErrorMessages = new List<string>() { ex.Message }, IsSuccess = false, StatusCode = HttpStatusCode.BadRequest });
@@ -342,12 +495,12 @@ namespace API127.Controllers
                 return Ok(_apiResponse);
 
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _apiResponse.Result = "";
                 _apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 _apiResponse.IsSuccess = true;
-                _apiResponse.ErrorMessages = new List<string>() {ex.InnerException.ToString() };
+                _apiResponse.ErrorMessages = new List<string>() { ex.InnerException.ToString() };
                 return BadRequest(_apiResponse);
             }
         }
@@ -384,13 +537,5 @@ namespace API127.Controllers
         }
     }
 
-    internal class ChunkMetaData
-    {
-        public string UploadUid { get; set; }
-        public string FileName { get; set; }
-        public int ChunkIndex { get; set; }
-        public int TotalChunks { get; set; }
-        public long TotalFileSize { get; set; }
-        public string ContentType { get; set; }
-    }
+
 }

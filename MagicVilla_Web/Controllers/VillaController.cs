@@ -22,12 +22,13 @@ namespace MagicVilla_Web.Controllers
             _mapper = mapper;
             _hostingEnvironment = hostingEnvironment;
         }
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> IndexVilla()
         {
             List<VillaDTO> list = new();
             var token = HttpContext.Session.GetString(SD.SessionToken);
             var response = await _villaService.GetAllAsync<APIResponse>(token);
+
             if (response != null && response.IsSuccess)
             {
                 list = JsonConvert.DeserializeObject<List<VillaDTO>>(Convert.ToString(response.Result));
@@ -128,75 +129,82 @@ namespace MagicVilla_Web.Controllers
             return View();
         }
         [HttpPost("Post-Data-Villa")]
-        [DisableFormValueModelBinding]
+        //[DisableFormValueModelBinding]
         [RequestSizeLimit(5L * 1024 * 1024 * 1024)]
         [RequestFormLimits(MultipartBodyLengthLimit = 5L * 1024 * 1024 * 1024)]
         public async Task<IActionResult> PostDataVilla2(VillaCreateDTO1 data)
         {
-            var model = new VillaCreateDTO()
+            try
             {
-                Details = "1111",
-                ImageUrl = "31",
-                Sqft = 2,
-                Amenity = "23",
-                Name = "33333333333",
-                Occupancy = 533,
-                Rate = 333,
-            };
-
-            var response = await _villaService.CreateAsync<APIResponse>(model, HttpContext.Session.GetString(SD.SessionToken));
-
-            #region KO CẦN XEM Vì, File To và file có sẵn trong máy rồi PostVilla4
-            //E:\API_127\API_127\MagicVilla_Web\wwwroot\200MB.pdf
-            //string htmlFilePath = Path.Combine(_hostingEnvironment.WebRootPath, "200MB.pdf");
-            //var zzz = await ChunkFileAsync(htmlFilePath);
-            #endregion
-
-            #region PostVilla3 File Input là IFormFile (Quan trọng) Stream file then send to API
-            object requestParams = null;
-            requestParams = new { ImageUrl ="aaa"};
-            using (MultipartFormDataContent content = new MultipartFormDataContent())
-            {
-                if (requestParams != null)
+                var model = new VillaCreateDTO()
                 {
-                    foreach (var prop in requestParams.GetType().GetProperties())
-                    {
-                        content.Add(new StringContent(prop.GetValue(requestParams)?.ToString() ?? ""), prop.Name);
-                    }
-                }
-
-                var streamContent = new StreamContent(data.files.OpenReadStream());
-                streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(data.files.ContentType);
-                streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-                {
-                    Name = "file",
-                    FileName = data.files.FileName,
+                    Details = "1111",
+                    ImageUrl = "31",
+                    Sqft = 2,
+                    Amenity = "23",
+                    Name = "33333333333",
+                    Occupancy = 533,
+                    Rate = 333,
                 };
-                content.Add(streamContent);
 
-                var httpClient = new HttpClient();
-                var res = await httpClient.PostAsync($"https://localhost:5001/api/VillaAPI/PostVilla3", content);
-                string responseData = await res.Content.ReadAsStringAsync();
+                var response = await _villaService.CreateAsync<APIResponse>(model, HttpContext.Session.GetString(SD.SessionToken));
+
+                #region KO CẦN XEM Vì, File To và file có sẵn trong máy rồi PostVilla4
+                //E:\API_127\API_127\MagicVilla_Web\wwwroot\200MB.pdf
+                //string htmlFilePath = Path.Combine(_hostingEnvironment.WebRootPath, "200MB.pdf");
+                //var zzz = await ChunkFileAsync(htmlFilePath);
+                #endregion
+
+                #region PostVilla3 File Input là IFormFile (Quan trọng) Stream file then send to API
+                object requestParams = null;
+                requestParams = new { ImageUrl = "aaa" };
+                using (MultipartFormDataContent content = new MultipartFormDataContent())
+                {
+                    if (requestParams != null)
+                    {
+                        foreach (var prop in requestParams.GetType().GetProperties())
+                        {
+                            content.Add(new StringContent(prop.GetValue(requestParams)?.ToString() ?? ""), prop.Name);
+                        }
+                    }
+
+                    var streamContent = new StreamContent(data.files.OpenReadStream());
+                    streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(data.files.ContentType);
+                    streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+                    {
+                        Name = "file",
+                        FileName = data.files.FileName,
+                    };
+                    content.Add(streamContent);
+
+                    var httpClient = new HttpClient();
+                    var res = await httpClient.PostAsync($"https://localhost:5001/api/v1/VillaAPI/PostVilla3", content);
+                    string responseData = await res.Content.ReadAsStringAsync();
+                }
+                #endregion
+
+                #region work with IFormFile setting IFormFile trong program.cs là dc nhận hết to nhỏ (Ok) PostVilla5
+                /*
+                 * work with IFormFile nhưng chưa dùng dc stream
+                 */
+                //var target = new MemoryStream();
+                //await data.files.CopyToAsync(target);
+                //var binary = target.ToArray();
+                //var responseUpload = await BasicUploadFile(binary, "5.zip", data.ImageUrl);
+                #endregion
+
+                if (response != null && response.IsSuccess)
+                {
+                    TempData["success"] = "Villa created successfully";
+                    return RedirectToAction(nameof(IndexVilla));
+                }
+                TempData["error"] = "Error encountered.";
+                return View(null);
             }
-            #endregion 
-
-            #region work with IFormFile setting IFormFile trong program.cs là dc nhận hết to nhỏ (Ok) PostVilla5
-            /*
-             * work with IFormFile nhưng chưa dùng dc stream
-             */
-            //var target = new MemoryStream();
-            //await data.files.CopyToAsync(target);
-            //var binary = target.ToArray();
-            //var responseUpload = await BasicUploadFile(binary, "5.zip", data.ImageUrl);
-            #endregion
-
-            if (response != null && response.IsSuccess)
+            catch (Exception ex)
             {
-                TempData["success"] = "Villa created successfully";
-                return RedirectToAction(nameof(IndexVilla));
+                return View(null);
             }
-            TempData["error"] = "Error encountered.";
-            return View(null);
         }
         public async Task<int> BasicUploadFile(byte[] fileByte, string fileName, string ImageUrl)
         {

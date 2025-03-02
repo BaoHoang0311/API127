@@ -17,18 +17,17 @@ namespace API127.Repository
     public class VillaRepositoryV2 : Repository<Villa>, IVillaRepositoryV2
     {
         private readonly  ApplicationDbContext _context;
+        private const string UploadsSubDirectory = "Files";
+        private readonly IEnumerable<string> allowedExtensions = new List<string> { ".zip", ".bin", ".png", ".jpg", ".pdf", ".avi",".txt" };
         public VillaRepositoryV2(ApplicationDbContext context):base(context)
         {
             _context = context;
         }
-
-        private const string UploadsSubDirectory = "Files";
-        private readonly IEnumerable<string> allowedExtensions = new List<string> { ".zip", ".bin", ".png", ".jpg", ".pdf", ".avi",".txt" };
-
         public async Task<FileUploadSummary> UploadFileAsync(Stream fileStream, string contentType)
         {
             var fileCount = 0;
             long totalSizeInBytes = 0;
+
 
             var boundary = GetBoundary(MediaTypeHeaderValue.Parse(contentType));
             var multipartReader = new MultipartReader(boundary, fileStream);

@@ -21,6 +21,9 @@ namespace MagicVilla_Web.Controllers
 
         public async Task<IActionResult> Index()
         {
+
+            //  E:\API_127\API_127\MagicVilla_Web
+            var rr = Environment.CurrentDirectory;
             List<VillaDTO> list = new();
 
             var response = await _villaService.GetAllAsync<APIResponse>(HttpContext.Session.GetString(SD.SessionToken));

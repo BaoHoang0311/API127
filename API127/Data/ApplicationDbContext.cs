@@ -1,11 +1,12 @@
 ﻿using API127.Models;
 using ERP.Infrastructure.Persistence.Configurations.ERP;
 using ERP.Infrastructure.Persistence.Interceptors;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace API127.Data
 {
-    public partial class ApplicationDbContext : DbContext
+    public partial class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         private readonly AuditableSaveChangesInterceptor _auditableInterceptor;
         public ApplicationDbContext()
@@ -20,14 +21,15 @@ namespace API127.Data
         {
             _auditableInterceptor = auditableInterceptor;
         }
+        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<LocalUser> LocalUsers { get; set; }
 
         public DbSet<Villa> Villas { get; set; }
         public DbSet<API127.Models.VillaNumber> VillaNumbers { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
             modelBuilder.ApplyConfiguration(new VillaConfiguration());
-
 
             modelBuilder.Entity<Villa>().HasData(
                     new Villa

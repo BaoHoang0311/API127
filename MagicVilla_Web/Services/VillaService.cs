@@ -2,7 +2,6 @@
 using MagicVilla_Web.Models;
 using MagicVilla_Web.Models.Dto;
 using MagicVilla_Web.Services.IServices;
-using System.Net.Http;
 
 namespace MagicVilla_Web.Services
 {
@@ -42,8 +41,8 @@ namespace MagicVilla_Web.Services
             return await SendAsync<T>(new APIRequest()
             {
                 ApiType = SD.ApiType.GET,
-                //Url = villaUrl + "/api/v1/villaAPI",
-                Url = villaUrl + "/api/villaAPI",
+                Url = villaUrl + "/api/v1/villaAPI",
+                //Url = villaUrl + "/api/villaAPI",
                 Token = token
             });
         }

@@ -1,0 +1,73 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Magic Villa Staging",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "MagicVillabuild",
+            "program": "${workspaceFolder}/MagicVilla_Web/bin/Debug/net7.0/MagicVilla_Web.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/MagicVilla_Web",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Staging"
+            }
+        },
+        {
+            "name": "Magic Villa Production",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "MagicVillabuild",
+            "program": "${workspaceFolder}/MagicVilla_Web/bin/Debug/net7.0/MagicVilla_Web.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/MagicVilla_Web",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Production"
+            }
+        },
+        {
+            "name": "API 127 Staging",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "API127build",
+            "program": "${workspaceFolder}/API127/bin/Debug/net7.0/API127.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/API127",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Staging"
+            }
+        },
+        {
+            "name": "API 127 Production",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "API127build",
+            "program": "${workspaceFolder}/API127/bin/Debug/net7.0/API127.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/API127",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Production"
+            }
+        }
+    ]
+}

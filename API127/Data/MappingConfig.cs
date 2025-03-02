@@ -20,7 +20,7 @@ namespace API127
             CreateMap<VillaNumber, VillaNumberCreateDTO>().ReverseMap();
             CreateMap<VillaNumber, VillaNumberUpdateDTO>().ReverseMap();
             //CreateMap<VillaNumber, VillaNumberUpdateDTO>().ReverseMap();
-            //CreateMap<ApplicationUser, UserDTO>().ReverseMap();
+            CreateMap<ApplicationUser, UserDTO>().ReverseMap();
         }
     }
 
